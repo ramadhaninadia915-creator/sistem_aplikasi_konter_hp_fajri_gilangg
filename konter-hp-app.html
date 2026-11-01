@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aplikasi Konter HP</title>
+<style>
+:root{--bg:#EEF3F1;--cd:#fff;--tx:#12262B;--mu:#5B6F73;--ln:#D5E0DD;--pr:#0F766E;--pt:#fff;--ok:#15803D;--wn:#B45309;--bd:#B91C1C;--hd:#0E3B43;--ht:#F2F7F6;--ac:#F2A900;color-scheme:light;background:var(--bg);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1719;--cd:#13242A;--tx:#E6F0EE;--mu:#93AAAD;--ln:#23383D;--pr:#2DD4BF;--pt:#06201C;--ok:#4ADE80;--wn:#FBBF24;--bd:#F87171;--hd:#091E22;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0C1719;--cd:#13242A;--tx:#E6F0EE;--mu:#93AAAD;--ln:#23383D;--pr:#2DD4BF;--pt:#06201C;--ok:#4ADE80;--wn:#FBBF24;--bd:#F87171;--hd:#091E22;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,::before,::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 "Avenir Next","Segoe UI",system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--hd);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:11;background:var(--hd);color:var(--ht);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+header b{font-size:17px}.sg{display:flex;gap:4px}
+.hb{background:transparent;color:var(--ht);border:1px solid #ffffff44;padding:6px 12px}.hb.on{background:var(--ac);border-color:var(--ac);color:#1B1400;font-weight:600}
+main{max-width:1100px;margin:0 auto;padding:16px}h3{margin:18px 0 8px;font-size:15px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--ln);background:var(--cd);color:var(--tx);padding:8px 12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--pr);outline-offset:2px}
+.p{background:var(--pr);border-color:var(--pr);color:var(--pt);font-weight:600}.d{color:var(--bd);border-color:var(--bd)}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--ln);border-radius:8px;background:var(--cd);color:var(--tx);min-width:0}
+.c{background:var(--cd);border:1px solid var(--ln);border-radius:12px;padding:14px}
+.g{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g2{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}
+.big{font-size:22px;font-weight:700}.mu{color:var(--mu)}small{font-size:12px}
+.r{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.r input{flex:1 1 140px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chip{font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px;background:color-mix(in srgb,currentColor 14%,transparent)}
+.sv{border-left:4px solid var(--k)}
+.tk{display:flex;gap:3px;margin:8px 0 2px}.tk i{flex:1;height:5px;border-radius:3px;background:var(--ln)}.tk i.on{background:var(--pr)}
+.two{display:grid;gap:12px;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);align-items:start}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.pb{text-align:left;display:block;width:100%}
+.w{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--ln)}
+details{margin-top:8px}summary{cursor:pointer;color:var(--mu)}ul,ol{margin:6px 0 0;padding-left:18px}
+hr{border:0;border-top:1px dashed var(--ln);margin:10px 0}
+.ov{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.ov>div{background:var(--cd);border-radius:12px;padding:20px;max-width:360px;width:100%;max-height:90vh;overflow:auto}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--hd);color:var(--ht);padding:10px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}#toast.show{opacity:1}
+</style></head><body>
+<header><b>Konter Maju Jaya</b><div class="sg" id="role"></div><nav class="sg" id="nav"></nav></header>
+<main id="app"></main><div id="mod"></div><div id="toast"></div>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const fmt=n=>'Rp '+Math.round(Number(n)||0).toLocaleString('id-ID');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=()=>new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const pad=(n,l=4)=>String(n).padStart(l,'0');
+const KEY='konterhp_v1';
+const ST=['Diterima','Diagnosa','Persetujuan','Dikerjakan','Selesai','Diambil'];
+const IDX={'Diterima':0,'Menunggu Persetujuan':2,'Dikerjakan':3,'Selesai':4,'Diambil':5};
+const COL={'Diterima':'var(--mu)','Menunggu Persetujuan':'var(--wn)','Dikerjakan':'var(--pr)','Selesai':'var(--ok)','Diambil':'var(--mu)','Dibatalkan':'var(--bd)','Habis':'var(--bd)','Menipis':'var(--wn)','Tersedia':'var(--ok)'};
+const NEED={'Diterima':'Teknisi','Menunggu Persetujuan':'Kasir','Dikerjakan':'Teknisi','Selesai':'Kasir'};
+const MET=['Tunai','QRIS','Transfer'];
+const seed=()=>({role:'Kasir',tab:'servis',seq:{s:232,i:39,p:7},
+products:[['BRG-001','Tempered Glass A15','Aksesoris',35000,24,5],['BRG-002','Charger Fast 20W','Aksesoris',85000,12,5],['BRG-003','Case Samsung A15','Aksesoris',45000,18,5],['BRG-004','Headset Bluetooth TWS','Audio',120000,4,5],['BRG-005','Kabel Data Type-C 1m','Aksesoris',25000,3,5],['BRG-006','Powerbank 10000mAh','Elektronik',175000,0,3]].map(a=>({id:a[0],nama:a[1],kat:a[2],harga:a[3],stok:a[4],min:a[5]})),
+services:[
+{id:'SRV-0228',nama:'Dewi L.',hp:'0812-3000-0228',dev:'iPhone 11',kel:'Port charger rusak',status:'Selesai',biaya:300000,hari:1,log:['Kasir menerima HP; nomor servis dibuat','Teknisi: bisa diperbaiki, estimasi Rp 300.000','Pelanggan setuju','Teknisi: perbaikan & uji fungsi selesai']},
+{id:'SRV-0229',nama:'Andi P.',hp:'0812-3000-0229',dev:'Xiaomi Redmi 12',kel:'Mati total',status:'Dikerjakan',biaya:250000,hari:2,log:['Kasir menerima HP; nomor servis dibuat','Teknisi: bisa diperbaiki, estimasi Rp 250.000','Pelanggan setuju']},
+{id:'SRV-0230',nama:'Siti R.',hp:'0812-3000-0230',dev:'Samsung A15',kel:'Ganti baterai',status:'Diterima',log:['Kasir menerima HP; nomor servis dibuat']},
+{id:'SRV-0231',nama:'Budi S.',hp:'0812-3000-0231',dev:'Oppo A57',kel:'LCD pecah',status:'Menunggu Persetujuan',biaya:350000,hari:2,log:['Kasir menerima HP; nomor servis dibuat','Teknisi: bisa diperbaiki, estimasi Rp 350.000 / 2 hari']}],
+sales:[{inv:'INV-0038',tgl:'Hari ini',items:[{nama:'Pulsa Telkomsel 25K',q:1,harga:27000},{nama:'Tempered Glass A15',q:1,harga:35000},{nama:'Charger Fast 20W',q:1,harga:85000}],total:147000,metode:'Tunai',dibayar:150000,kembali:3000}]});
+let S=null;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.products)S=seed();
+let cart=[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.className='show';clearTimeout(toast.t);toast.t=setTimeout(()=>{t.className=''},2600)};
+const chip=s=>`<span class="chip" style="color:${COL[s]}">${s}</span>`;
+const F=id=>S.services.find(v=>v.id===id);
+const lg=(v,t)=>v.log.push(now()+' — '+t);
+const need=v=>NEED[v.status];
+
+function svCard(v){
+  const n=need(v),can=n===S.role,i=IDX[v.status],id=v.id;let a='';
+  if(can){
+    if(v.status==='Diterima')a=`<div class="r"><input id="b-${id}" type="number" min="0" placeholder="Estimasi biaya (Rp)"><input id="h-${id}" type="number" min="1" placeholder="Lama (hari)"></div><div class="r"><button class="p" data-a="ya" data-id="${id}">Bisa diperbaiki</button><button class="d" data-a="tdk" data-id="${id}">Tidak bisa diperbaiki</button></div>`;
+    else if(v.status==='Menunggu Persetujuan')a=`<div class="r"><button class="p" data-a="setuju" data-id="${id}">Pelanggan setuju</button><button class="d" data-a="tolak" data-id="${id}">Pelanggan menolak</button></div>`;
+    else if(v.status==='Dikerjakan')a=`<div class="r"><button class="p" data-a="done" data-id="${id}">Selesai diperbaiki dan lulus uji</button></div>`;
+    else if(v.status==='Selesai')a=!v.called?`<div class="r"><button class="p" data-a="call" data-id="${id}">Hubungi pelanggan</button></div>`:`<div class="r"><select id="m-${id}">${MET.map(m=>`<option>${m}</option>`).join('')}</select><button class="p" data-a="pay" data-id="${id}">HP diambil, terima bayar</button></div>`;
+  }else if(n)a=`<small class="mu">Menunggu tindakan ${n}</small>`;
+  const tk=i==null?'':`<div class="tk">${ST.map((s,k)=>`<i class="${k<=i?'on':''}"></i>`).join('')}</div><small class="mu">Tahap ${i+1} dari 6: ${ST[i]}</small>`;
+  return `<div class="c sv" style="--k:${COL[v.status]}"><div class="sp"><b>${id}</b>${chip(v.status)}</div><div>${esc(v.nama)} · ${esc(v.hp)}</div><div class="mu">${esc(v.dev)}: ${esc(v.kel)}</div>${v.biaya?`<div>Estimasi <b>${fmt(v.biaya)}</b>${v.hari?` · ${v.hari} hari`:''}</div>`:''}${tk}${a}<details><summary>Riwayat proses</summary><ul>${v.log.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details></div>`;
+}
+function svView(){
+  const form=S.role==='Kasir'?`<div class="c"><b>Terima HP baru</b><div class="r"><input id="fn" placeholder="Nama pelanggan"><input id="fh" placeholder="No. HP"><input id="fd" placeholder="Merek / tipe HP"><input id="fk" placeholder="Keluhan"><button class="p" data-a="new">Buat nomor servis</button></div></div>`:`<div class="c mu">Penerimaan HP baru dilakukan oleh peran Kasir.</div>`;
+  return `<h3>Servis HP</h3>${form}<h3>Daftar servis</h3><div class="g2">${[...S.services].reverse().map(svCard).join('')}</div><details class="c"><summary>Alur proses servis (sesuai diagram BPMN)</summary><ol><li>Pelanggan membawa HP; Kasir mencatat keluhan dan membuat nomor servis.</li><li>Teknisi mendiagnosa: bisa diperbaiki atau tidak.</li><li>Jika bisa, Kasir menginformasikan estimasi; pelanggan setuju atau menolak.</li><li>Teknisi memperbaiki dan menguji; status Selesai.</li><li>Kasir menghubungi pelanggan; pelanggan mengambil HP dan membayar; nota dicetak.</li></ol></details>`;
+}
+function ksView(){
+  const tot=cart.reduce((s,c)=>s+c.harga*c.q,0);
+  const items=cart.length?cart.map(c=>`<div class="sp" style="margin:6px 0"><span>${esc(c.nama)}<br><small class="mu">${fmt(c.harga)}</small></span><span><button data-a="dec" data-id="${c.id}">-</button> ${c.q} <button data-a="inc" data-id="${c.id}">+</button></span></div>`).join(''):'<p class="mu">Keranjang kosong. Pilih produk di sebelah kiri.</p>';
+  return `<h3>Kasir</h3><div class="two"><div class="g">${S.products.map(p=>`<button class="c pb" data-a="add" data-id="${p.id}" ${p.stok<1?'disabled':''}><b>${esc(p.nama)}</b><br>${fmt(p.harga)}<br><small class="mu">Stok ${p.stok}</small></button>`).join('')}</div><div class="c"><b>Keranjang</b>${items}<hr><div class="sp"><span>Total</span><span class="big">${fmt(tot)}</span></div><div class="r"><select id="km">${MET.map(m=>`<option>${m}</option>`).join('')}</select><input id="dp" type="number" min="0" placeholder="Uang dibayar (Tunai)"></div><div class="r"><button class="p" style="flex:1" data-a="buy">Bayar</button></div></div></div><h3>Riwayat transaksi</h3><div class="c">${S.sales.slice(-5).reverse().map(s=>`<div class="sp"><span>${s.inv} · ${esc(s.tgl)}</span><span>${fmt(s.total)} · ${s.metode}</span></div>`).join('')}</div>`;
+}
+function stView(){
+  return `<h3>Stok barang</h3><div class="c w"><table><tr><th>Kode<th>Barang<th>Kategori<th>Harga<th>Stok<th>Min<th>Status<th>Tambah</tr>${S.products.map(p=>{const s=p.stok<1?'Habis':p.stok<=p.min?'Menipis':'Tersedia';return `<tr><td>${p.id}<td>${esc(p.nama)}<td>${esc(p.kat)}<td>${fmt(p.harga)}<td>${p.stok}<td>${p.min}<td>${chip(s)}<td><button data-a="rs" data-id="${p.id}:5">+5</button> <button data-a="rs" data-id="${p.id}:10">+10</button>`}).join('')}</table></div><h3>Barang baru</h3><div class="c"><div class="r"><input id="pn" placeholder="Nama barang"><input id="pk" placeholder="Kategori"><input id="ph" type="number" min="0" placeholder="Harga jual"><input id="ps" type="number" min="0" placeholder="Stok awal"><button class="p" data-a="addp">Tambah barang</button></div></div>`;
+}
+function render(){
+  $('#role').innerHTML=['Kasir','Teknisi'].map(r=>`<button class="hb${S.role===r?' on':''}" data-a="role" data-id="${r}">${r}</button>`).join('');
+  $('#nav').innerHTML=[['servis','Servis HP'],['kasir','Kasir'],['stok','Stok']].map(a=>`<button class="hb${S.tab===a[0]?' on':''}" data-a="tab" data-id="${a[0]}">${a[1]}</button>`).join('');
+  const act=S.services.filter(v=>v.status!=='Diambil'&&v.status!=='Dibatalkan');
+  const cards=[['Servis aktif',act.length],['Perlu tindakan '+S.role,act.filter(v=>need(v)===S.role).length],['Total pendapatan',fmt(S.sales.reduce((s,x)=>s+x.total,0))],['Stok menipis',S.products.filter(p=>p.stok<=p.min).length]];
+  $('#app').innerHTML=`<div class="g">${cards.map(c=>`<div class="c"><small class="mu">${c[0]}</small><div class="big">${c[1]}</div></div>`).join('')}</div>`+(S.tab==='servis'?svView():S.tab==='kasir'?ksView():stView())+`<p><button data-a="reset">Reset data contoh</button></p>`;
+  save();
+}
+const nota=s=>{$('#mod').innerHTML=`<div class="ov"><div><h3 style="margin:0">Konter Maju Jaya</h3><small class="mu">${s.inv} · ${esc(s.tgl)}</small><hr>${s.items.map(i=>`<div class="sp"><span>${esc(i.nama)} ×${i.q}</span><b>${fmt(i.harga*i.q)}</b></div>`).join('')}<hr><div class="sp"><b>Total</b><b class="big">${fmt(s.total)}</b></div><div class="sp"><span>Metode</span><span>${s.metode}</span></div><div class="sp"><span>Dibayar</span><span>${fmt(s.dibayar)}</span></div><div class="sp"><span>Kembali</span><span>${fmt(s.kembali)}</span></div><div class="r"><button class="p" style="flex:1" data-a="close">Tutup</button></div></div></div>`};
+const H={
+  role:id=>{S.role=id},tab:id=>{S.tab=id},close:()=>{$('#mod').innerHTML=''},
+  new(){const g=i=>$('#'+i).value.trim();const nama=g('fn'),dev=g('fd');
+    if(!nama||!dev){toast('Isi nama pelanggan dan tipe HP');return false}
+    const v={id:'SRV-'+pad(S.seq.s++),nama,hp:g('fh')||'-',dev,kel:g('fk')||'-',status:'Diterima',log:[]};
+    lg(v,'Kasir menerima HP dan mencatat keluhan; nomor servis dibuat');S.services.push(v);toast('Nomor servis '+v.id+' dibuat')},
+  ya(id){const b=+$('#b-'+id).value,h=+$('#h-'+id).value||1;if(!(b>0)){toast('Isi estimasi biaya terlebih dahulu');return false}
+    const v=F(id);v.biaya=b;v.hari=h;v.status='Menunggu Persetujuan';lg(v,'Teknisi: bisa diperbaiki. Kasir menginformasikan estimasi '+fmt(b)+' / '+h+' hari')},
+  tdk(id){const v=F(id);v.status='Dibatalkan';lg(v,'Teknisi: tidak bisa diperbaiki. Kasir menginformasikan pelanggan; servis dibatalkan')},
+  setuju(id){const v=F(id);v.status='Dikerjakan';lg(v,'Pelanggan setuju. Status: Dikerjakan')},
+  tolak(id){const v=F(id);v.status='Dibatalkan';lg(v,'Pelanggan menolak estimasi; servis dibatalkan')},
+  done(id){const v=F(id);v.status='Selesai';lg(v,'Teknisi: perbaikan dan uji fungsi selesai')},
+  call(id){const v=F(id);v.called=true;lg(v,'Kasir menghubungi pelanggan: HP sudah selesai')},
+  pay(id){const v=F(id),m=$('#m-'+id).value;
+    const s={inv:'INV-'+pad(S.seq.i++),tgl:now(),items:[{nama:'Servis '+v.dev+' ('+v.id+')',q:1,harga:v.biaya}],total:v.biaya,metode:m,dibayar:v.biaya,kembali:0};
+    S.sales.push(s);v.status='Diambil';lg(v,'Pelanggan mengambil HP; Kasir menerima bayar '+fmt(v.biaya)+' ('+m+') dan mencetak nota');nota(s)},
+  add(id){const p=S.products.find(x=>x.id===id),c=cart.find(x=>x.id===id),q=(c?c.q:0)+1;
+    if(q>p.stok){toast('Stok '+p.nama+' tidak cukup');return false}
+    if(c)c.q=q;else cart.push({id,nama:p.nama,harga:p.harga,q:1})},
+  inc(id){return H.add(id)},
+  dec(id){const c=cart.find(x=>x.id===id);if(--c.q<1)cart=cart.filter(x=>x!==c)},
+  buy(){if(!cart.length){toast('Keranjang masih kosong');return false}
+    const tot=cart.reduce((s,c)=>s+c.harga*c.q,0),m=$('#km').value,dp=m==='Tunai'?+$('#dp').value:tot;
+    if(!(dp>=tot)){toast('Uang dibayar kurang dari total '+fmt(tot));return false}
+    cart.forEach(c=>{S.products.find(p=>p.id===c.id).stok-=c.q});
+    const s={inv:'INV-'+pad(S.seq.i++),tgl:now(),items:cart.map(c=>({nama:c.nama,q:c.q,harga:c.harga})),total:tot,metode:m,dibayar:dp,kembali:dp-tot};
+    S.sales.push(s);cart=[];nota(s)},
+  rs(x){const a=x.split(':');S.products.find(p=>p.id===a[0]).stok+=+a[1]},
+  addp(){const g=i=>$('#'+i).value.trim(),nama=g('pn'),h=+g('ph');
+    if(!nama||!(h>0)){toast('Isi nama barang dan harga jual');return false}
+    S.products.push({id:'BRG-'+pad(S.seq.p++,3),nama,kat:g('pk')||'Lainnya',harga:h,stok:+g('ps')||0,min:5});toast('Barang ditambahkan')},
+  reset(){if(!H.reset.c){H.reset.c=1;toast('Tekan Reset sekali lagi untuk konfirmasi');setTimeout(()=>{H.reset.c=0},3000);return false}
+    H.reset.c=0;S=seed();cart=[];toast('Data contoh dipulihkan')}
+};
+document.addEventListener('click',e=>{
+  if(e.target.classList&&e.target.classList.contains('ov')){$('#mod').innerHTML='';return}
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const f=H[b.dataset.a];if(f&&f(b.dataset.id)!==false)render();
+});
+render();
+})();
+</script></body></html>
